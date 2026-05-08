@@ -30,7 +30,8 @@
       "Bash(pip install *)",
       "Bash(python -m pytest tests/test_gmail_draft.py -v)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(python -m py_compile src/lonespec_splitter/__main__.py)"
     ],
     "additionalDirectories": [
       "c:\\c\\0-dropbox\\Dropbox\\1oels dokument\\Antigravity\\Acrobat pro\\tests"
