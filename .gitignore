@@ -31,3 +31,5 @@ desktop.ini
 output_test/
 *.local.pdf
 tests/output/
+tests/output_*/
+

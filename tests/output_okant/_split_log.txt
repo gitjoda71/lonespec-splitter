@@ -1,8 +1,0 @@
-Lonespec-splitter — körlogg
-Tidpunkt:   2026-05-08 13:52:23
-Indata:     tests\fixtures\fixture_okant_format.pdf
-Utdatamapp: tests\output_okant
-Antal grupper: 1
-
-=== Filer ===
-  1. sidor [1]  →  Filip Forsberg 2026-04-25.pdf  (regel: namn=above-pnr-prev-line, datum=first-text)
