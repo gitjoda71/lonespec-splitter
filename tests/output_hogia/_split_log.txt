@@ -1,0 +1,9 @@
+Lonespec-splitter — körlogg
+Tidpunkt:   2026-05-08 13:52:22
+Indata:     tests\fixtures\fixture_hogia_2personer_2sidor.pdf
+Utdatamapp: tests\output_hogia
+Antal grupper: 2
+
+=== Filer ===
+  1. sidor [1,2]  →  Daniel Dahlqvist 2026-04-25.pdf  (regel: namn=keyword-inline:anställd, datum=keyword:lönedatum+iso)
+  2. sidor [3,4]  →  Elin Ekström 2026-04-25.pdf  (regel: namn=keyword-inline:anställd, datum=keyword:lönedatum+iso)

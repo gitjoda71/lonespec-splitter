@@ -4,7 +4,26 @@
       "Read(//c/Users/Joels laptop/.claude/projects/c--0-dropbox-Dropbox-1oels-dokument-Antigravity-Acrobat-pro/memory//**)",
       "Read(//c/Users/Joels laptop/.claude/projects//**)",
       "Bash(gh --version)",
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "Bash(python -m pip install --quiet -r requirements-dev.txt)",
+      "Bash(python tests/fixtures/generate_fixtures.py)",
+      "Bash(python -m pip install --quiet -e .)",
+      "Bash(rm -rf tests/output_visma)",
+      "Bash(python -m lonespec_splitter tests/fixtures/fixture_visma_3personer.pdf tests/output_visma)",
+      "Read(//c/c/0-dropbox/Dropbox/1oels dokument/Antigravity/Acrobat pro/tests/**)",
+      "Read(//c/c/0-dropbox/Dropbox/1oels dokument/Antigravity/Acrobat pro/tests/output_visma/**)",
+      "Bash(rm -rf tests/output_hogia tests/output_okant)",
+      "Bash(python -m lonespec_splitter tests/fixtures/fixture_hogia_2personer_2sidor.pdf tests/output_hogia)",
+      "Bash(python -m lonespec_splitter tests/fixtures/fixture_okant_format.pdf tests/output_okant)",
+      "Bash(rm -rf tests/output_visma tests/output_hogia tests/output_okant)",
+      "Bash(python -m lonespec_splitter --quiet tests/fixtures/fixture_visma_3personer.pdf tests/output_visma)",
+      "Bash(python -m lonespec_splitter --quiet tests/fixtures/fixture_hogia_2personer_2sidor.pdf tests/output_hogia)",
+      "Bash(python -m lonespec_splitter --quiet tests/fixtures/fixture_okant_format.pdf tests/output_okant)",
+      "Bash(python -c ' *)",
+      "Bash(python -m pytest)"
+    ],
+    "additionalDirectories": [
+      "c:\\c\\0-dropbox\\Dropbox\\1oels dokument\\Antigravity\\Acrobat pro\\tests"
     ]
   }
 }
