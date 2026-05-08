@@ -19,7 +19,7 @@ def test_cli_with_gmail_flag_no_config(tmp_path):
 
 
 def test_cli_with_gmail_config_missing_file(tmp_path):
-    """Test --with-gmail with missing config file."""
+    """Test --with-gmail with missing config file — graceful degradation."""
     fixture_path = Path(__file__).parent / "fixtures" / "fixture_visma_3personer.pdf"
 
     if not fixture_path.exists():
@@ -43,4 +43,5 @@ def test_cli_with_gmail_config_missing_file(tmp_path):
     ]
     result = main(argv)
 
-    assert result == 1
+    # Should succeed (0) because Gmail init fails gracefully, split still works
+    assert result == 0
