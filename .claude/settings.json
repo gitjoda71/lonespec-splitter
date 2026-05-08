@@ -31,7 +31,10 @@
       "Bash(python -m pytest tests/test_gmail_draft.py -v)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(python -m py_compile src/lonespec_splitter/__main__.py)"
+      "Bash(python -m py_compile src/lonespec_splitter/__main__.py)",
+      "Bash(python -m pytest tests/test_integration_gmail.py::test_cli_with_gmail_flag_no_config -v)",
+      "Bash(python -m pytest tests/test_gmail_draft.py tests/test_integration_gmail.py -v)",
+      "Bash(python -m pytest tests/test_gmail_draft.py tests/test_integration_gmail.py::test_cli_with_gmail_flag_no_config -v)"
     ],
     "additionalDirectories": [
       "c:\\c\\0-dropbox\\Dropbox\\1oels dokument\\Antigravity\\Acrobat pro\\tests"
