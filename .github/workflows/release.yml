@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build distribution ZIP
+        run: |
+          mkdir -p dist
+          VERSION="${GITHUB_REF_NAME#v}"
+          STAGING="dist/lonespec-splitter-v${VERSION}"
+          mkdir -p "$STAGING"
+          cp -r src "$STAGING/"
+          cp -r docs "$STAGING/"
+          cp pyproject.toml requirements.txt requirements-dev.txt install.ps1 \
+             README.md ROADMAP.md SPEC.md CHANGELOG.md LICENSE \
+             "$STAGING/"
+          # Inkludera fixture-genereringsskriptet (lättviktig demo)
+          mkdir -p "$STAGING/tests/fixtures"
+          cp tests/fixtures/generate_fixtures.py "$STAGING/tests/fixtures/"
+          (cd dist && zip -r "lonespec-splitter-v${VERSION}.zip" "lonespec-splitter-v${VERSION}")
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/lonespec-splitter-v*.zip
+          generate_release_notes: true
+          body: |
+            ## Installation
+            1. Ladda ner ZIP-filen nedan.
+            2. Packa upp.
+            3. Högerklick på `install.ps1` → "Kör med PowerShell".
+            4. Starta om Adobe Acrobat Pro DC.
+
+            Detaljerad guide: [docs/INSTALL.md](docs/INSTALL.md).
