@@ -1,0 +1,17 @@
+# Gmail Drafting Configuration
+# Copy this file to gmail_config.yaml and fill in your details.
+# IMPORTANT: gmail_config.yaml is NOT checked into git. Add to .gitignore if needed.
+
+# Enable Gmail drafting (true/false)
+enabled: false
+
+# Your Google Workspace domain (e.g., "company.se")
+workspace_domain: "workspace.se"
+
+# Path to service account JSON key file
+# Download this from Google Cloud Console:
+# 1. Go to google.com/cloud
+# 2. Create a Service Account in your project
+# 3. Create a JSON key and download it
+# 4. Set the path here (absolute or relative to this file)
+service_account_key_path: "./service_account_key.json"

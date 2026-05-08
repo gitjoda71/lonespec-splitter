@@ -35,5 +35,6 @@ def write_log(result: SplitResult) -> Path:
         lines.append("=== Fel ===")
         for e in result.errors:
             lines.append(f"- {e}")
-    log_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    # utf-8-sig så Notepad och äldre Windows-verktyg känner igen UTF-8
+    log_path.write_text("\n".join(lines) + "\n", encoding="utf-8-sig")
     return log_path

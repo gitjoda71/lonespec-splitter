@@ -26,7 +26,9 @@ NAMN_BLOCKLISTA = {
     "utbetalningsdatum", "utbetalning", "betalningsdag",
     "anställd", "anstalld", "namn", "mottagare", "betalningsmottagare",
     "personnummer", "period", "avdelning", "datum", "till",
-    "visma", "hogia", "fortnox",
+    "visma", "hogia", "fortnox", "kontek", "crona",
+    "sverige", "stockholm", "göteborg", "goteborg", "malmö", "malmo",
+    "löneperiod", "loneperiod", "insatt", "lön", "lon",
     "sida", "av", "sammanställning", "sammanstallning",
     "bruttolön", "bruttolon", "skatt", "netto", "nettolön", "nettolon",
     "att", "utbetala", "detaljerad", "löneberäkning", "loneberakning",
@@ -168,14 +170,36 @@ def parse_date(text: str) -> tuple[str | None, str | None]:
 
 
 def _split_first_last(full: str) -> tuple[str, str]:
-    """Dela 'Förnamn Mellan Efternamn' → ('Förnamn Mellan', 'Efternamn').
+    """Dela ett namn till (förnamn, efternamn).
 
-    v0.1: enkla tumregeln "sista ordet = efternamn", resten = förnamn(en).
+    Stödjer två format:
+    - 'Förnamn Mellan Efternamn' → ('Förnamn Mellan', 'Efternamn')   (default)
+    - 'Efternamn, Förnamn'       → ('Förnamn', 'Efternamn')          (Kontek m.fl.)
+
+    v0.1: enkla tumregeln för utan-komma-fallet "sista ordet = efternamn".
     """
+    full = full.strip()
+    # Komma-format: "Danielsson, Joel" eller "Andersson, Anna Maria"
+    if "," in full:
+        last, _, first = full.partition(",")
+        last = last.strip()
+        first = first.strip()
+        if last and first:
+            return first, last
     parts = full.split()
     if len(parts) == 1:
         return parts[0], ""
     return " ".join(parts[:-1]), parts[-1]
+
+
+# Regex för Efternamn, Förnamn-format (Kontek-stil)
+# Vänster sida (efternamn) tillåter 1–3 ord (dubbla efternamn: "Danielsson Svensson, Joel").
+# Höger sida (förnamn) tillåter 1–3 ord (mellannamn: "Andersson, Anna Maria Britt").
+NAMN_KOMMA = (
+    rf"({NAMN_DEL}(?:\s+{NAMN_DEL}){{0,2}})"
+    rf"\s*,\s*"
+    rf"({NAMN_DEL}(?:\s+{NAMN_DEL}){{0,2}})"
+)
 
 
 def _accept_name(full: str) -> tuple[str, str] | None:
@@ -200,24 +224,75 @@ def parse_name(text: str) -> tuple[str | None, str | None, str | None]:
 
     name_re_full = re.compile(rf"^({NAMN_FULL})\s*$")
     name_re_inline = re.compile(rf"({NAMN_FULL})")
+    komma_re_full = re.compile(rf"^{NAMN_KOMMA}\s*$")
+    komma_re_inline = re.compile(NAMN_KOMMA)
 
-    # Strategi 1: rad efter ett namn-keyword (ex. "Anställd: Anna Andersson")
+    def _try_komma_line(line: str) -> tuple[str, str] | None:
+        """Försök matcha 'Efternamn[, …], Förnamn[ …]' på en rad.
+
+        Stödjer dubbla efternamn ('Danielsson Svensson, Joel') och
+        flera förnamn ('Andersson, Anna Maria').
+        """
+        m = komma_re_full.match(line) or komma_re_inline.search(line)
+        if not m:
+            return None
+        last_raw, first_raw = m.group(1).strip(), m.group(2).strip()
+        # Avvisa om hela efternamns-strängen är blockerad
+        if _name_has_blocked_word(last_raw):
+            # Tillåt ledande blocklistord att trimmas av (sällsynt fall),
+            # men inte att ett blocklistord står som efternamns-del.
+            return None
+        # Trimma ev. trailing keyword från förnamn-delen
+        first_raw = _trim_at_blocked(first_raw).strip()
+        if not first_raw:
+            return None
+        return first_raw, last_raw
+
+    # Strategi 1: rad efter ett namn-keyword (ex. "Anställd: Anna Andersson", "Mottagare\nDanielsson, Joel")
     for i, line in enumerate(lines):
-        low = line.lower()
+        low = line.lower().rstrip(":")  # tillåt "Mottagare" lika väl som "Mottagare:"
         for kw in NAMN_KEYWORDS:
-            if low.startswith(kw + ":") or low.startswith(kw + " "):
-                rest = line.split(":", 1)[-1].strip() if ":" in line else line[len(kw):].strip()
+            kw_match = (
+                low == kw
+                or low.startswith(kw + ":")
+                or low.startswith(kw + " ")
+            )
+            if not kw_match:
+                continue
+            # Försök läsa namn på samma rad efter keyword
+            if ":" in line:
+                rest = line.split(":", 1)[-1].strip()
+            elif low == kw:
+                rest = ""
+            else:
+                rest = line[len(kw):].strip()
+            if rest:
+                # Komma-format först
+                fl = _try_komma_line(rest)
+                if fl:
+                    return fl[0], fl[1], f"keyword-inline-komma:{kw}"
                 m = name_re_inline.search(rest)
                 if m:
                     fl = _accept_name(m.group(1))
                     if fl:
                         return fl[0], fl[1], f"keyword-inline:{kw}"
-                if i + 1 < len(lines):
-                    nm = name_re_full.match(lines[i + 1])
-                    if nm:
-                        fl = _accept_name(nm.group(1))
-                        if fl:
-                            return fl[0], fl[1], f"keyword-nextline:{kw}"
+            # Och på nästa rad (eller raden efter, om mellanrad är tom)
+            for j in (i + 1, i + 2):
+                if j >= len(lines):
+                    break
+                nxt = lines[j]
+                if not nxt:
+                    continue
+                fl = _try_komma_line(nxt)
+                if fl:
+                    return fl[0], fl[1], f"keyword-nextline-komma:{kw}"
+                nm = name_re_full.match(nxt)
+                if nm:
+                    fl = _accept_name(nm.group(1))
+                    if fl:
+                        return fl[0], fl[1], f"keyword-nextline:{kw}"
+                # Stoppa vid första icke-tomma rad så vi inte vandrar in i adressen
+                break
 
     # Strategi 2: rad direkt OVANFÖR ett personnummer
     for i, line in enumerate(lines):
@@ -244,6 +319,10 @@ def parse_name(text: str) -> tuple[str | None, str | None, str | None]:
 
     # Strategi 3: första raden som ser ut som ett komplett namn
     for line in lines[:20]:
+        # Komma-format först
+        fl = _try_komma_line(line)
+        if fl:
+            return fl[0], fl[1], "first-name-line-komma"
         nm = name_re_full.match(line)
         if nm:
             fl = _accept_name(nm.group(1))

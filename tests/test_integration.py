@@ -10,11 +10,18 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 @pytest.fixture(scope="module", autouse=True)
 def ensure_fixtures():
-    """Generera fixtures om de inte finns."""
-    visma = FIXTURES / "fixture_visma_3personer.pdf"
-    if not visma.is_file():
-        from tests.fixtures.generate_fixtures import main as gen
-        gen()
+    """Generera fixtures om de inte finns (kör generate_fixtures.py som subprocess)."""
+    needed = [
+        "fixture_visma_3personer.pdf",
+        "fixture_hogia_2personer_2sidor.pdf",
+        "fixture_okant_format.pdf",
+        "fixture_kontek_3personer.pdf",
+    ]
+    if not all((FIXTURES / n).is_file() for n in needed):
+        import subprocess, sys
+        subprocess.check_call(
+            [sys.executable, str(FIXTURES / "generate_fixtures.py")]
+        )
 
 
 def test_visma_3_files(tmp_path: Path):
@@ -48,6 +55,17 @@ def test_okant_format(tmp_path: Path):
     assert g.first == "Filip"
     assert g.last == "Forsberg"
     assert g.date == "2026-04-25"
+
+
+def test_kontek_3_files(tmp_path: Path):
+    result = split_pdf(FIXTURES / "fixture_kontek_3personer.pdf", tmp_path)
+    names = sorted(p.out_path.name for p in result.groups)
+    assert names == [
+        "Anna Östlund 2026-05-25.pdf",
+        "Björn Bergström 2026-05-25.pdf",
+        "Joel Danielsson 2026-05-25.pdf",
+    ]
+    assert all(not g.fallback_used for g in result.groups)
 
 
 def test_log_file_written(tmp_path: Path):

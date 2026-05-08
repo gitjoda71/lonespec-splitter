@@ -237,3 +237,100 @@ GitHub Actions:
 - **2026-05-08:** Repo publikt, MIT-licens.
 - **2026-05-08:** Använder `reportlab` för att generera fixture-PDF:er (välkänt, deterministiskt).
 - **2026-05-08:** Installer-script Windows-only i v0.1 (manuell macOS-instruktion i INSTALL.md, automatiseras i v0.2).
+
+---
+
+## 9. v0.2.0 — Gmail-drafting
+
+**Mål:** Efter split skapas Gmail-utkast automatiskt för varje lönespec.
+- Mottagare: slå upp medarbetarens `@workspace.se`-email via Google Workspace Directory API.
+- Ämne: `Lönespecifikation [utbetalningsdatum]`
+- Body: enkel template (`Hej {namn}, Se bifogad lönespecifikation för period {periode} (utbetald {datum}).`)
+- Åtgärd: lagra som DRAFT i Gmail (ej skicka).
+- Användaren granskar utkastmappen i Gmail → skickar manuellt.
+
+### Teknikval för v0.2
+
+| Komponent | Val | Motivering |
+|---|---|---|
+| **Auth** | Service Account (JSON-nyckel) | Backend-process behöver inga interaktiva inloggningar. Skapas i Google Cloud Console per workspace. |
+| **Directory API** | Google Workspace Directory API | Slår upp namn → email. Kräver att workspace-admin har aktiverat API och delegerat behörighet. |
+| **Gmail API** | `google-auth-oauthlib` + `google-auth-httplib2` | Officiell SDK, mogen. Skapa DRAFT via `messages.create()` utan att skicka. |
+| **Config** | YAML + environment var | `gmail_config.yaml` lagrar workspace-domän, service-account-nyckel-path. Denna checkas INTE in (`.gitignore`). |
+| **Error handling** | Graceful degradation | Saknas Directory API-nyckel → skapa DRAFT med bara namn (fallback). Gmail API-fel → logg + gå vidare med nästa person. |
+
+### Arkitektur v0.2
+
+```
+┌────────────────────────────────────────────────┐
+│ Python-backend (CLI) — UTÖKAD              │
+│  src/lonespec_splitter/                        │
+│   ├── __main__.py         (CLI + argparse)     │
+│   ├── splitter.py         (oförändrad)         │
+│   ├── parser.py           (oförändrad)         │
+│   ├── filename.py         (oförändrad)         │
+│   ├── log.py              (oförändrad)         │
+│   ├── extractor.py        (oförändrad)         │
+│   │                                            │
+│   ├── gmail_draft.py       [NYT]               │ ← Gmail-modul
+│   │  ├── GmailDrafter(config_path)             │   - service account auth
+│   │  ├── lookup_email(name) → email            │   - Directory API lookup
+│   │  ├── create_draft(to, subject, body)       │   - Gmail draft create
+│   │  └── render_template(name, datum, period) │   - template rendering
+│   │                                            │
+│   └── gmail_config.py      [NYT]               │ ← Config handling
+│      ├── load_config(yaml_path)                │
+│      └── validate_keys()                       │
+└────────────────────────────────────────────────┘
+                   │
+                   ▼
+    ┌──────────────────────────────┐
+    │ Google Workspace             │
+    │  ├─ Directory API            │
+    │  │  (namn → email lookup)     │
+    │  └─ Gmail API                │
+    │     (create draft)            │
+    └──────────────────────────────┘
+```
+
+### Milstolpar v0.2
+
+#### M7 — Gmail-modul (auth + API-wrappers)
+**Acceptanskriterier:**
+- `GmailDrafter`-klass med Service Account-auth.
+- `lookup_email(name)` mot Directory API (mock-testbar).
+- `create_draft(to, subject, body)` mot Gmail API.
+- Unit-tester (mocked API:er).
+
+#### M8 — Config + template
+**Acceptanskriterier:**
+- `gmail_config.yaml` template-fil med instruktioner.
+- `GmailDrafter.render_template()` för ämneslinje + brödtext.
+- Tester för mallar.
+
+#### M9 — CLI-integrering
+**Acceptanskriterier:**
+- `lonespec_splitter --with-gmail --gmail-config ./gmail_config.yaml input.pdf outdir/`
+- Efter split: för varje PDf-fil → slå upp email → skapa DRAFT.
+- Logga draft-skapning i `_split_log.txt`.
+
+#### M10 — Tester + docs
+**Acceptanskriterier:**
+- Integration-tester med mocked Gmail/Directory API:er.
+- `GMAIL_SETUP.md` — instruktion för workspace-admin att delegera API-åtkomst.
+- `CHANGELOG.md` updated.
+
+#### M11 — Release v0.2.0
+**Acceptanskriterier:**
+- GitHub tag `v0.2.0`, ZIP-artefakt med ny kod.
+- `requirements.txt` updated (Google SDK:er tillagda).
+
+---
+
+## Decision log (v0.2)
+
+- **2026-05-08:** Vald Service Account för auth (ej OAuth2 user-interaktiv) — enklare backend-process.
+- **2026-05-08:** Workspace Directory API för namn→email lookup (kräver workspace-admin-delegation, men robust).
+- **2026-05-08:** Gmail API v1 via officiell SDK.
+- **2026-05-08:** YAML-config för Google Cloud-nyckel (checkas INTE in).
+- **2026-05-08:** Graceful degradation: saknas API-nyckel → skapa DRAFT med bara namn; API-fel → logg och gå vidare.

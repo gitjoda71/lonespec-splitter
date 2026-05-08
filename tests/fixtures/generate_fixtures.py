@@ -21,6 +21,7 @@ HERE = Path(__file__).parent
 OUT_VISMA = HERE / "fixture_visma_3personer.pdf"
 OUT_HOGIA = HERE / "fixture_hogia_2personer_2sidor.pdf"
 OUT_OKANT = HERE / "fixture_okant_format.pdf"
+OUT_KONTEK = HERE / "fixture_kontek_3personer.pdf"
 
 # (förnamn, efternamn, personnummer-prefix, datum YYYY-MM-DD)
 VISMA_PERSONER = [
@@ -32,6 +33,13 @@ VISMA_PERSONER = [
 HOGIA_PERSONER = [
     ("Daniel", "Dahlqvist",  "19880601", "2026-04-25"),
     ("Elin",   "Ekström",    "19950322", "2026-04-25"),
+]
+
+# Kontek-format: "Mottagare\nEfternamn, Förnamn"
+KONTEK_PERSONER = [
+    ("Joel",  "Danielsson",  "19850517", "2026-05-25"),
+    ("Anna",  "Östlund",     "19920811", "2026-05-25"),
+    ("Björn", "Bergström",   "19790203", "2026-05-25"),
 ]
 
 
@@ -172,11 +180,52 @@ def build_okant() -> None:
     print(f"  Skrev {OUT_OKANT.name}")
 
 
+def _draw_kontek_page(c: canvas.Canvas, person: tuple[str, str, str, str]) -> None:
+    """Kontek-stil: stor 'Lönespecifikation'-rubrik, 'Mottagare'-block med
+    'Efternamn, Förnamn' på raden under."""
+    first, last, pnr_prefix, datum = person
+    pnr = f"{pnr_prefix}-0000"
+
+    c.setFont("Helvetica-BoldOblique", 24)
+    c.drawCentredString(297, 770, "Lönespecifikation")
+
+    # Mottagar-box
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(50, 700, "Mottagare")
+    c.setFont("Helvetica", 11)
+    c.drawString(50, 685, f"{last}, {first}")
+    c.drawString(50, 670, "Storgatan 1")
+    c.drawString(50, 655, "111 11 Stockholm")
+    c.drawString(50, 640, f"Personnummer: {pnr}")
+
+    # Datum-block
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(350, 700, f"Utbetalning: {datum}")
+    c.setFont("Helvetica", 10)
+    c.drawString(350, 685, "Löneperiod: 2026-05-01 – 2026-05-31")
+    c.drawString(350, 670, "Insatt på konto: ****1234")
+
+    # Sidfot
+    c.setFont("Helvetica", 8)
+    c.drawString(50, 50, "https://kontek.se/sv/")
+    c.drawString(50, 38, "Ordning: Efternamn, Förnamn")
+
+
+def build_kontek() -> None:
+    c = canvas.Canvas(str(OUT_KONTEK), pagesize=A4)
+    for person in KONTEK_PERSONER:
+        _draw_kontek_page(c, person)
+        c.showPage()
+    c.save()
+    print(f"  Skrev {OUT_KONTEK.name}")
+
+
 def main() -> None:
     print("Genererar fixtures …")
     build_visma()
     build_hogia()
     build_okant()
+    build_kontek()
     print("Klart.")
 
 

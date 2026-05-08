@@ -93,6 +93,59 @@ class TestParseName:
         assert first is None
         assert last is None
 
+    # --- Kontek-formatet: "Mottagare\nDanielsson, Joel" ---
+    def test_kontek_keyword_no_colon_nextline_komma(self):
+        text = "Mottagare\nDanielsson, Joel"
+        first, last, rule = parse_name(text)
+        assert first == "Joel"
+        assert last == "Danielsson"
+        assert "komma" in rule
+
+    def test_kontek_with_colon_komma(self):
+        text = "Mottagare: Andersson, Anna Maria"
+        first, last, _ = parse_name(text)
+        assert first == "Anna Maria"
+        assert last == "Andersson"
+
+    def test_kontek_skips_blank_line(self):
+        text = "Mottagare\n\nÖstlund, Cecilia"
+        first, last, _ = parse_name(text)
+        assert first == "Cecilia"
+        assert last == "Östlund"
+
+    def test_komma_first_line_fallback(self):
+        # Ingen keyword men "Efternamn, Förnamn" på första raden
+        text = "Bergström, Björn\nNågon annan text"
+        first, last, _ = parse_name(text)
+        assert first == "Björn"
+        assert last == "Bergström"
+
+    def test_kontek_rejects_company(self):
+        # Visa att vi inte plockar "Kontek, AB"
+        text = "Mottagare\nKontek, AB"
+        first, last, _ = parse_name(text)
+        assert first is None
+        assert last is None
+
+    def test_kontek_double_lastname(self):
+        # Dubbla efternamn — vanligt i svenska lönesystem
+        text = "Mottagare\nDanielsson Svensson, Joel"
+        first, last, _ = parse_name(text)
+        assert first == "Joel"
+        assert last == "Danielsson Svensson"
+
+    def test_kontek_double_lastname_three_word_first(self):
+        text = "Mottagare\nÖstlund Bergström, Anna Maria Britt"
+        first, last, _ = parse_name(text)
+        assert first == "Anna Maria Britt"
+        assert last == "Östlund Bergström"
+
+    def test_kontek_double_lastname_inline_keyword(self):
+        text = "Mottagare: Larsson Holm, Erik"
+        first, last, _ = parse_name(text)
+        assert first == "Erik"
+        assert last == "Larsson Holm"
+
 
 class TestExtractPageOfN:
     def test_sida_x_av_y(self):

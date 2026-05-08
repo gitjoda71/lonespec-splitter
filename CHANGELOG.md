@@ -5,6 +5,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioner enli
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-05-08
+
+### Added
+- **Kontek-layoutstöd**: keywordet `Mottagare` (med eller utan kolon) följt av namn på nästa rad.
+- Stöd för formatet **`Efternamn, Förnamn`** (vanligt i Kontek/svenska lönesystem) — delas korrekt till förnamn/efternamn i filnamnet.
+- Ny syntetisk fixture `fixture_kontek_3personer.pdf` + integration­stest.
+- Fler ord på blocklistan (`Kontek`, `Crona`, `Löneperiod`, `Insatt`, `Sverige`, `Stockholm`, `Göteborg`, `Malmö`) så företagsnamn/rubriker inte plockas som personnamn.
+
+### Changed
+- `_split_log.txt` skrivs nu med **UTF-8 BOM** (`utf-8-sig`) så Notepad och äldre Windows-verktyg visar åäö rätt.
+- Strategi 1 (keyword-match) hoppar förbi tomma rader när namnet står på rad 2 efter keywordet.
+
+### Fixed
+- Verifierat mot en riktig 23-sidig Kontek-lönespec: 23/23 personer får korrekt namn (tidigare 8/23).
+
 ## [0.1.0] — 2026-05-08
 
 ### Added

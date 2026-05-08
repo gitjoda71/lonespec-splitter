@@ -20,7 +20,17 @@
       "Bash(python -m lonespec_splitter --quiet tests/fixtures/fixture_hogia_2personer_2sidor.pdf tests/output_hogia)",
       "Bash(python -m lonespec_splitter --quiet tests/fixtures/fixture_okant_format.pdf tests/output_okant)",
       "Bash(python -c ' *)",
-      "Bash(python -m pytest)"
+      "Bash(python -m pytest)",
+      "Bash(gh repo *)",
+      "Bash(gh release *)",
+      "Bash(gh run *)",
+      "Read(//c/Users/Joels laptop/Desktop//**)",
+      "Read(//c/Users/Joels laptop/Downloads/**)",
+      "Read(//c/c/0-dropbox/Dropbox/1oels dokument/Antigravity/Acrobat pro/src/lonespec_splitter/**)",
+      "Bash(pip install *)",
+      "Bash(python -m pytest tests/test_gmail_draft.py -v)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ],
     "additionalDirectories": [
       "c:\\c\\0-dropbox\\Dropbox\\1oels dokument\\Antigravity\\Acrobat pro\\tests"
