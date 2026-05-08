@@ -5,6 +5,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioner enli
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-05-08
+
+### Fixed (kritiska Gmail-fixar)
+- **PDF:en bifogas nu i utkastet** (tidigare skapades bara textmail utan bilaga). Multipart-MIME med `application/pdf`-attachment där filnamnet är samma som splittrade PDF:en.
+- **Utkasten hamnar i din egen Gmail-utkasts-mapp** via Domain-Wide Delegation och nytt config-fält `delegated_user`. Tidigare hamnade de i Service Account-användarens kontext (osynliga).
+- **Email-lookup robustare**: provar nu både `fullName:"Förnamn Efternamn"`, `fullName:"Efternamn, Förnamn"` (Kontek-stil), och `givenName/familyName`-kombination. Stödjer dubbla efternamn.
+
+### Added
+- Config-fält `delegated_user` i `gmail_config.yaml` (obligatoriskt när `enabled: true`).
+- Sanity-check att `delegated_user`-domänen matchar `workspace_domain`.
+- 5 nya pytest-tester: PDF-attachment, Kontek-fallback i lookup, dubbla efternamn, end-to-end med bilaga (decodear MIME för verifiering). 63/63 grön.
+
+### Changed
+- `create_draft_for_person()` accepterar nu `pdf_path`, `first`, `last` för bättre lookup och bilaga.
+- `gmail_config.yaml.example` uppdaterad med kommentarer kring `delegated_user`.
+- GMAIL_SETUP.md dokumenterar Domain-Wide Delegation tydligare.
+
 ## [0.2.0] — 2026-05-08
 
 ### Added

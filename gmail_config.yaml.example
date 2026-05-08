@@ -1,17 +1,18 @@
 # Gmail Drafting Configuration
-# Copy this file to gmail_config.yaml and fill in your details.
-# IMPORTANT: gmail_config.yaml is NOT checked into git. Add to .gitignore if needed.
+# Kopiera denna fil till gmail_config.yaml och fyll i dina värden.
+# VIKTIGT: gmail_config.yaml ligger i .gitignore — checka aldrig in den.
 
-# Enable Gmail drafting (true/false)
-enabled: false
+# Aktivera Gmail-drafting
+enabled: true
 
-# Your Google Workspace domain (e.g., "company.se")
-workspace_domain: "workspace.se"
+# Din Google Workspace-domän (t.ex. "company.se")
+workspace_domain: "ditt-foretag.se"
 
-# Path to service account JSON key file
-# Download this from Google Cloud Console:
-# 1. Go to google.com/cloud
-# 2. Create a Service Account in your project
-# 3. Create a JSON key and download it
-# 4. Set the path here (absolute or relative to this file)
+# Din egen Gmail-adress i Workspace.
+# Service Account impersonerar denna användare via Domain-Wide Delegation,
+# så att utkasten hamnar i DENNA användares Gmail → Utkast-mapp.
+delegated_user: "joel@ditt-foretag.se"
+
+# Sökväg till service account JSON-nyckel (laddas ner från Google Cloud Console)
+# Absolut väg eller relativ till denna config-fil.
 service_account_key_path: "./service_account_key.json"

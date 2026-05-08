@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lonespec-splitter"
-version = "0.2.0"
+version = "0.2.1"
 description = "Splitta samlad lönespec-PDF till en fil per person, med automatisk namnsättning och Gmail-drafting."
 readme = "README.md"
 license = { text = "MIT" }

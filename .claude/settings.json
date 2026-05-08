@@ -39,7 +39,8 @@
       "Bash(git push *)",
       "Bash(python -m pytest tests/ -v --tb=short)",
       "Bash(python -m pytest tests/test_integration_gmail.py::test_cli_with_gmail_config_missing_file -v)",
-      "Bash(python -m pytest tests/ -q)"
+      "Bash(python -m pytest tests/ -q)",
+      "Bash(python -m pytest tests/test_gmail_draft.py)"
     ],
     "additionalDirectories": [
       "c:\\c\\0-dropbox\\Dropbox\\1oels dokument\\Antigravity\\Acrobat pro\\tests"

@@ -62,12 +62,14 @@ Denna guide beskriver hur du konfigurerar lonespec-splitter för att automatiskt
 2. Redigera `gmail_config.yaml`:
    ```yaml
    enabled: true
-   workspace_domain: "ditt-företag.se"  # Din Workspace-domän
+   workspace_domain: "ditt-foretag.se"
+   delegated_user: "joel@ditt-foretag.se"   # din egen Gmail-adress
    service_account_key_path: "/path/to/your/service_account_key.json"
    ```
 
 3. Ersätt värdena:
-   - `workspace_domain`: Din Google Workspace-domän (t.ex., `company.se`).
+   - `workspace_domain`: Din Google Workspace-domän (t.ex. `company.se`).
+   - `delegated_user`: **Din egen Gmail-adress.** Service Account impersonerar denna användare via Domain-Wide Delegation, så att utkasten hamnar i **din** Gmail → Utkast-mapp (inte i SA:s mailbox).
    - `service_account_key_path`: Absolut sökväg till JSON-nyckeln från steg 4.
 
 4. **Viktigt:** Lägg inte till `gmail_config.yaml` eller JSON-nyckeln i git-repot. De är redan i `.gitignore`.
@@ -80,7 +82,13 @@ python -m lonespec_splitter input.pdf output_dir/ --with-gmail --gmail-config ./
 
 Om allt är konfigurerat rätt:
 - PDF:en splittas normalt.
-- För varje person skapas en Gmail-utkast i din Gmail-inkorgs **Utkast**-mapp.
+- För varje person skapas ett utkast i **din egen** Gmail (`delegated_user`) → **Utkast**-mappen.
+- Varje utkast har:
+  - **Till:** mottagarens email (slås upp i Workspace Directory)
+  - **Ämne:** `Lönespecifikation YYYY-MM-DD`
+  - **Bilaga:** den splittrade PDF-filen för just den personen
+  - **Body:** kort hälsningstext (kan editeras före sändning)
+- Inga mail skickas — du öppnar Gmail → Utkast, granskar, och trycker **Skicka** själv.
 - Logg skrivs till `output_dir/_split_log.txt`.
 
 ## Felsökning
@@ -99,12 +107,17 @@ Om allt är konfigurerat rätt:
 
 ### Utkast skapas inte för vissa personer
 - Namn på lönespec matchar inte Workspace-katalogens namn exakt — logg visar varning.
+- v0.2.1+ försöker både `Förnamn Efternamn` och `Efternamn, Förnamn` (Kontek-stil) automatiskt.
 - Om namn är känt-felaktigt kan du manuellt öppna utkastet och korrigera mottagaren innan du skickar.
+
+### Utkasten hamnar fel ställe
+- Verifiera att `delegated_user` i config är **din egen** Gmail-adress (där du vill se utkasten).
+- Utan Domain-Wide Delegation kan SA inte impersonera — kontrollera steg 5.
 
 ## Sekretesspolicy
 
-- JSON-nyckeln är **mycket känslig** — den ger full åtkomst till Gmail och katalog. Lagra den säkert och dela aldrig.
-- Drafts skapas under det tjänstekonto-e-postadresser som konfigurerades, **ej** under din personliga Gmail.
+- JSON-nyckeln är **mycket känslig** — den ger full åtkomst till Gmail och Workspace Directory. Lagra den säkert och dela aldrig.
+- Drafts skapas i **`delegated_user`-användarens** Gmail-mailbox (din egen). PDF-bilagorna laddas upp till Gmails servrar som en del av utkastet.
 - Alla drafts är märkta med namnet på den ursprungliga lönespec-PDF:en i loggen.
 
 ## Support

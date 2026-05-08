@@ -100,17 +100,19 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _create_gmail_drafts(result, config_path: Path, quiet: bool) -> None:
-    """Create Gmail drafts for each person."""
+    """Skapa Gmail-utkast (med PDF-bilaga) för varje person i splitresultatet."""
     logger = logging.getLogger(__name__)
 
     try:
         config = GmailConfig(str(config_path))
         if not config.validate():
-            logger.error("Gmail config validation failed")
+            logger.error("Gmail config validation failed — hoppar över utkast")
             return
 
         drafter = GmailDrafter(
-            config.service_account_key_path, config.workspace_domain
+            service_account_key_path=config.service_account_key_path,
+            workspace_domain=config.workspace_domain,
+            delegated_user=config.delegated_user,
         )
     except FileNotFoundError as e:
         logger.error(f"Gmail config error: {e}")
@@ -120,26 +122,31 @@ def _create_gmail_drafts(result, config_path: Path, quiet: bool) -> None:
         return
 
     draft_count = 0
+    skipped = 0
     for group in result.groups:
-        if group.fallback_used:
-            logger.debug(f"Skipping draft for {group.out_path.name} (fallback name)")
-            continue
-
-        if not (group.first and group.last and group.date):
+        if group.fallback_used or not (group.first and group.last and group.date):
+            logger.debug(
+                f"Hoppar över draft för {group.out_path.name} (saknar fullständigt namn/datum)"
+            )
+            skipped += 1
             continue
 
         full_name = f"{group.first} {group.last}"
-        pay_date = group.date
-
         draft_id = drafter.create_draft_for_person(
-            name=full_name, pay_date=pay_date
+            name=full_name,
+            pay_date=group.date,
+            first=group.first,
+            last=group.last,
+            pdf_path=group.out_path,
         )
         if draft_id:
             draft_count += 1
-            logger.info(f"Draft created for {full_name}: {draft_id}")
+        else:
+            skipped += 1
 
     if not quiet:
-        print(f"Gmail: {draft_count} utkast skapade")
+        print(f"Gmail: {draft_count} utkast skapade, {skipped} hoppades över")
+        print(f"  → öppna Gmail → Utkast hos {config.delegated_user}")
 
 
 if __name__ == "__main__":
