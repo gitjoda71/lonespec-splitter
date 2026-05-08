@@ -5,6 +5,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioner enli
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-05-08
+
+### Added
+- **Gmail-drafting**: Automatisk skapning av Gmail-utkast för varje lönespec-mottagare.
+- Google Workspace Directory API-integrering för namn → email-lookup.
+- Google Workspace-admin setup-guide (`GMAIL_SETUP.md`).
+- CLI-flaggor: `--with-gmail` och `--gmail-config <path>`.
+- Config-file `gmail_config.yaml` för Google Cloud Service Account och Workspace-domän.
+- Graceful degradation: saknas API-nyckel eller Directory API-lookup misslyckas → logg + hoppa över draft.
+
+### Changed
+- `requirements.txt` utökad med Google API-bibliotek (`google-auth`, `google-api-python-client`, `PyYAML`).
+
+### Known limitations
+- Gmail-drafting kräver Google Workspace-admin för API-setup + domain-wide delegation.
+- Service Account-nyckel är känslig och får ej checkas in (redan i `.gitignore`).
+
 ## [0.1.1] — 2026-05-08
 
 ### Added
