@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lonespec-splitter"
-version = "0.1.1"
-description = "Splitta samlad lönespec-PDF till en fil per person, med automatisk namnsättning."
+version = "0.2.0"
+description = "Splitta samlad lönespec-PDF till en fil per person, med automatisk namnsättning och Gmail-drafting."
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "Joel" }]
@@ -23,6 +23,11 @@ dependencies = [
   "pypdf>=4.3.0",
   "pdfplumber>=0.11.0",
   "python-dateutil>=2.9.0",
+  "google-auth>=2.27.0",
+  "google-auth-oauthlib>=1.2.0",
+  "google-auth-httplib2>=0.2.0",
+  "google-api-python-client>=2.100.0",
+  "PyYAML>=6.0",
 ]
 
 [project.optional-dependencies]
