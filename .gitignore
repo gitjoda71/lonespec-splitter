@@ -14,8 +14,7 @@ env/
 
 # Build
 build/
-dist/*.whl
-dist/*.tar.gz
+dist/
 
 # IDE
 .vscode/
