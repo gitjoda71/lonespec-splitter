@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Joels laptop/.claude/projects/c--0-dropbox-Dropbox-1oels-dokument-Antigravity-Acrobat-pro/memory//**)",
+      "Read(//c/Users/Joels laptop/.claude/projects//**)",
+      "Bash(gh --version)",
+      "Bash(gh auth *)"
+    ]
+  }
+}
